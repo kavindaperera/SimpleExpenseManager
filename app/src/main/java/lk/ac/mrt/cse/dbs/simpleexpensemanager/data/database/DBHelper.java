@@ -26,7 +26,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE " + TransactionTable.TABLE_NAME + " (" +
                 TransactionTable._ID + " INTEGER PRIMARY KEY ," +
-                TransactionTable.COLUMN_NAME_ACCOUNT_NO + "VARCHAR ," +
+                TransactionTable.COLUMN_NAME_ACCOUNT_NO + " VARCHAR ," +
                 TransactionTable.COLUMN_NAME_DATE + " DATE ," +
                 TransactionTable.COLUMN_NAME_TRANSACTION_TYPE + " VARCHAR ," +
                 TransactionTable.COLUMN_NAME_AMOUNT+" DOUBLE ,"+
@@ -37,6 +37,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
         db.execSQL("DROP TABLE IF EXISTS " + AccountTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TransactionTable.TABLE_NAME);
+        onCreate(db);
     }
 
 }
