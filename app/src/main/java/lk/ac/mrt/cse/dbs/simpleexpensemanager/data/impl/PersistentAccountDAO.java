@@ -43,7 +43,8 @@ public class PersistentAccountDAO implements AccountDAO {
             String account_no = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_ACCOUNT_NO));
             String bank_name = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_BANK_NAME));
             String account_holder_name = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_ACCOUNT_HOLDER_NAME));
-            double
+            double balance = cursor.getDouble(cursor.getColumnIndex(AccountTable.COLUMN_NAME_INITIAL_BALANCE));
+            Account account = new Account(account_no, bank_name, account_holder_name, balance);
         }
 
         return account_list;
@@ -51,21 +52,58 @@ public class PersistentAccountDAO implements AccountDAO {
 
     @Override
     public Account getAccount(String accountNo) throws InvalidAccountException {
-        return null;
+        Cursor cursor = database.rawQuery("SELECT * FROM " + AccountTable.TABLE_NAME + " WHERE " + AccountTable.COLUMN_NAME_ACCOUNT_NO + " = '" + accountNo + "';", null);
+        if (cursor.getCount() == 0) {
+            throw new InvalidAccountException("Account is invalid");
+        } else {
+            cursor.moveToFirst();
+            String bank_name = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_BANK_NAME));
+            String account_holder_name = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_ACCOUNT_HOLDER_NAME));
+            double balance = cursor.getDouble(cursor.getColumnIndex(AccountTable.COLUMN_NAME_INITIAL_BALANCE));
+            Account account = new Account(accountNo, bank_name, account_holder_name, balance);
+            return account;
+        }
     }
-
     @Override
     public void addAccount(Account account) {
 
+            SQLiteStatement statement=database.compileStatement("INSERT INTO "+ AccountTable.TABLE_NAME+"("+ AccountTable.COLUMN_NAME_ACCOUNT_NO+","+ AccountTable.COLUMN_NAME_BANK_NAME+","+
+                    AccountTable.COLUMN_NAME_ACCOUNT_HOLDER_NAME+","+ AccountTable.COLUMN_NAME_INITIAL_BALANCE+") VALUES(?,?,?,?);");
+            statement.bindString(1,account.getAccountNo());
+            statement.bindString(2,account.getBankName());
+            statement.bindString(3,account.getAccountHolderName());
+            statement.bindDouble(4,account.getBalance());
+            try{
+                statement.executeInsert();
+            }
+            catch (SQLiteConstraintException ex){
+                Log.e("Error","Integrity error occurred");
+            }
     }
 
     @Override
     public void removeAccount(String accountNo) throws InvalidAccountException {
-
+        SQLiteStatement statement=database.compileStatement("DELETE FROM "+ AccountTable.TABLE_NAME+" WHERE "+ AccountTable.COLUMN_NAME_ACCOUNT_NO+" = ?;"); //avoid sql injection
+        statement.bindString(1,accountNo);
+        statement.executeUpdateDelete();
     }
 
     @Override
     public void updateBalance(String accountNo, ExpenseType expenseType, double amount) throws InvalidAccountException {
+        Account account=getAccount(accountNo);
 
+        switch (expenseType) {
+            case EXPENSE:
+                account.setBalance(account.getBalance() - amount);
+                break;
+            case INCOME:
+                account.setBalance(account.getBalance() + amount);
+                break;
+        }
+        SQLiteStatement statement=database.compileStatement("UPDATE "+ AccountTable.TABLE_NAME+" SET "+ AccountTable.COLUMN_NAME_INITIAL_BALANCE+" = ? WHERE "+
+                AccountTable.COLUMN_NAME_ACCOUNT_NO+" = ? ;" );
+        statement.bindDouble(1,account.getBalance());
+        statement.bindString(2,accountNo);
+        statement.executeUpdateDelete();
     }
 }
