@@ -1,5 +1,6 @@
 package lk.ac.mrt.cse.dbs.simpleexpensemanager.data.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.ExpenseType;
 
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.database.DBContract.AccountTable;
 
-public class PersistentAccountDAO implements AccountDAO {
+public class PersistentAccountDAO implements AccountDAO, Serializable {
 
     private transient SQLiteDatabase database;
 
