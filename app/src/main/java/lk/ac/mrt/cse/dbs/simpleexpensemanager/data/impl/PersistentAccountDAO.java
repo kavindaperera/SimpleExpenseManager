@@ -37,8 +37,16 @@ public class PersistentAccountDAO implements AccountDAO {
 
     @Override
     public List<Account> getAccountsList() {
-        Cursor cursor = database.rawQuery
-        return null;
+        Cursor cursor = database.rawQuery("SELECT * FROM "+AccountTable.TABLE_NAME,null);
+        List<Account> account_list = new ArrayList<>();
+        while(cursor.moveToNext()){
+            String account_no = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_ACCOUNT_NO));
+            String bank_name = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_BANK_NAME));
+            String account_holder_name = cursor.getString(cursor.getColumnIndex(AccountTable.COLUMN_NAME_ACCOUNT_HOLDER_NAME));
+            double
+        }
+
+        return account_list;
     }
 
     @Override
